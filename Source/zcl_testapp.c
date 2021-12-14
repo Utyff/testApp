@@ -1,5 +1,5 @@
 /**************************************************************************************************
-  Filename:       zcl_genericapp.c
+  Filename:       zcl_testapp.c
   Revised:        $Date: 2014-10-24 16:04:46 -0700 (Fri, 24 Oct 2014) $
   Revision:       $Revision: 40796 $
 
@@ -42,7 +42,7 @@
   This application is a template to get started writing an application
   from scratch.
 
-  Look for the sections marked with "GENERICAPP_TODO" to add application
+  Look for the sections marked with "TESTAPP_TODO" to add application
   specific code.
 
   Note: if you would like your application to support automatic attribute
@@ -65,7 +65,7 @@
 #include "zcl_general.h"
 #include "zcl_ha.h"
 #include "zcl_diagnostic.h"
-#include "zcl_genericapp.h"
+#include "zcl_testapp.h"
 
 #include "bdb.h"
 #include "bdb_interface.h"
@@ -108,7 +108,7 @@
 /*********************************************************************
  * GLOBAL VARIABLES
  */
-byte zclGenericApp_TaskID;
+byte zclTestApp_TaskID;
 
 
 /*********************************************************************
@@ -123,42 +123,42 @@ uint8 giGenAppScreenMode = GENERIC_MAINMODE;   // display the main screen mode f
 
 uint8 gPermitDuration = 0;    // permit joining default to disabled
 
-devStates_t zclGenericApp_NwkState = DEV_INIT;
+devStates_t zclTestApp_NwkState = DEV_INIT;
 
 
 /*********************************************************************
  * LOCAL FUNCTIONS
  */
-static void zclGenericApp_HandleKeys( byte shift, byte keys );
-static void zclGenericApp_BasicResetCB( void );
-static void zclGenericApp_ProcessIdentifyTimeChange( uint8 endpoint );
-static void zclGenericApp_BindNotification( bdbBindNotificationData_t *data );
+static void zclTestApp_HandleKeys( byte shift, byte keys );
+static void zclTestApp_BasicResetCB( void );
+static void zclTestApp_ProcessIdentifyTimeChange( uint8 endpoint );
+static void zclTestApp_BindNotification( bdbBindNotificationData_t *data );
 #if ( defined ( BDB_TL_TARGET ) && (BDB_TOUCHLINK_CAPABILITY_ENABLED == TRUE) )
-static void zclGenericApp_ProcessTouchlinkTargetEnable( uint8 enable );
+static void zclTestApp_ProcessTouchlinkTargetEnable( uint8 enable );
 #endif
 
-static void zclGenericApp_ProcessCommissioningStatus(bdbCommissioningModeMsg_t *bdbCommissioningModeMsg);
+static void zclTestApp_ProcessCommissioningStatus(bdbCommissioningModeMsg_t *bdbCommissioningModeMsg);
 
 // app display functions
-static void zclGenericApp_LcdDisplayUpdate( void );
+static void zclTestApp_LcdDisplayUpdate( void );
 #ifdef LCD_SUPPORTED
-static void zclGenericApp_LcdDisplayMainMode( void );
-static void zclGenericApp_LcdDisplayHelpMode( void );
+static void zclTestApp_LcdDisplayMainMode( void );
+static void zclTestApp_LcdDisplayHelpMode( void );
 #endif
 
 // Functions to process ZCL Foundation incoming Command/Response messages
-static void zclGenericApp_ProcessIncomingMsg( zclIncomingMsg_t *msg );
+static void zclTestApp_ProcessIncomingMsg( zclIncomingMsg_t *msg );
 #ifdef ZCL_READ
-static uint8 zclGenericApp_ProcessInReadRspCmd( zclIncomingMsg_t *pInMsg );
+static uint8 zclTestApp_ProcessInReadRspCmd( zclIncomingMsg_t *pInMsg );
 #endif
 #ifdef ZCL_WRITE
-static uint8 zclGenericApp_ProcessInWriteRspCmd( zclIncomingMsg_t *pInMsg );
+static uint8 zclTestApp_ProcessInWriteRspCmd( zclIncomingMsg_t *pInMsg );
 #endif
-static uint8 zclGenericApp_ProcessInDefaultRspCmd( zclIncomingMsg_t *pInMsg );
+static uint8 zclTestApp_ProcessInDefaultRspCmd( zclIncomingMsg_t *pInMsg );
 #ifdef ZCL_DISCOVER
-static uint8 zclGenericApp_ProcessInDiscCmdsRspCmd( zclIncomingMsg_t *pInMsg );
-static uint8 zclGenericApp_ProcessInDiscAttrsRspCmd( zclIncomingMsg_t *pInMsg );
-static uint8 zclGenericApp_ProcessInDiscAttrsExtRspCmd( zclIncomingMsg_t *pInMsg );
+static uint8 zclTestApp_ProcessInDiscCmdsRspCmd( zclIncomingMsg_t *pInMsg );
+static uint8 zclTestApp_ProcessInDiscAttrsRspCmd( zclIncomingMsg_t *pInMsg );
+static uint8 zclTestApp_ProcessInDiscAttrsExtRspCmd( zclIncomingMsg_t *pInMsg );
 #endif
 
 static void zclSampleApp_BatteryWarningCB( uint8 voltLevel);
@@ -169,7 +169,7 @@ static void zclSampleApp_BatteryWarningCB( uint8 voltLevel);
 #ifdef LCD_SUPPORTED
 const char sDeviceName[]   = "  Generic App";
 const char sClearLine[]    = " ";
-const char sSwGenericApp[]      = "SW1:GENAPP_TODO";  // GENERICAPP_TODO
+const char sSwTestApp[]      = "SW1:GENAPP_TODO";  // TESTAPP_TODO
 const char sSwBDBMode[]     = "SW2: Start BDB";
 char sSwHelp[]             = "SW4: Help       ";  // last character is * if NWK open
 #endif
@@ -177,9 +177,9 @@ char sSwHelp[]             = "SW4: Help       ";  // last character is * if NWK 
 /*********************************************************************
  * ZCL General Profile Callback table
  */
-static zclGeneral_AppCallbacks_t zclGenericApp_CmdCallbacks =
+static zclGeneral_AppCallbacks_t zclTestApp_CmdCallbacks =
 {
-  zclGenericApp_BasicResetCB,             // Basic Cluster Reset command
+  zclTestApp_BasicResetCB,             // Basic Cluster Reset command
   NULL,                                   // Identify Trigger Effect command
   NULL,                                   // On/Off cluster commands
   NULL,                                   // On/Off cluster enhanced command Off with Effect
@@ -211,7 +211,7 @@ static zclGeneral_AppCallbacks_t zclGenericApp_CmdCallbacks =
 };
 
 /*********************************************************************
- * GENERICAPP_TODO: Add other callback structures for any additional application specific 
+ * TESTAPP_TODO: Add other callback structures for any additional application specific
  *       Clusters being used, see available callback structures below.
  *
  *       bdbTL_AppCallbacks_t 
@@ -231,7 +231,7 @@ static zclGeneral_AppCallbacks_t zclGenericApp_CmdCallbacks =
  */
 
 /*********************************************************************
- * @fn          zclGenericApp_Init
+ * @fn          zclTestApp_Init
  *
  * @brief       Initialization function for the zclGeneral layer.
  *
@@ -239,47 +239,47 @@ static zclGeneral_AppCallbacks_t zclGenericApp_CmdCallbacks =
  *
  * @return      none
  */
-void zclGenericApp_Init( byte task_id )
+void zclTestApp_Init( byte task_id )
 {
-  zclGenericApp_TaskID = task_id;
+  zclTestApp_TaskID = task_id;
 
   // This app is part of the Home Automation Profile
-  bdb_RegisterSimpleDescriptor( &zclGenericApp_SimpleDesc );
+  bdb_RegisterSimpleDescriptor( &zclTestApp_SimpleDesc );
 
   // Register the ZCL General Cluster Library callback functions
-  zclGeneral_RegisterCmdCallbacks( GENERICAPP_ENDPOINT, &zclGenericApp_CmdCallbacks );
+  zclGeneral_RegisterCmdCallbacks( TESTAPP_ENDPOINT, &zclTestApp_CmdCallbacks );
   
-  // GENERICAPP_TODO: Register other cluster command callbacks here
+  // TESTAPP_TODO: Register other cluster command callbacks here
 
   // Register the application's attribute list
-  zcl_registerAttrList( GENERICAPP_ENDPOINT, zclGenericApp_NumAttributes, zclGenericApp_Attrs );
+  zcl_registerAttrList( TESTAPP_ENDPOINT, zclTestApp_NumAttributes, zclTestApp_Attrs );
 
   // Register the Application to receive the unprocessed Foundation command/response messages
-  zcl_registerForMsg( zclGenericApp_TaskID );
+  zcl_registerForMsg( zclTestApp_TaskID );
 
 #ifdef ZCL_DISCOVER
   // Register the application's command list
-  zcl_registerCmdList( GENERICAPP_ENDPOINT, zclCmdsArraySize, zclGenericApp_Cmds );
+  zcl_registerCmdList( TESTAPP_ENDPOINT, zclCmdsArraySize, zclTestApp_Cmds );
 #endif
 
   // Register low voltage NV memory protection application callback
   RegisterVoltageWarningCB( zclSampleApp_BatteryWarningCB );
 
   // Register for all key events - This app will handle all key events
-  RegisterForKeys( zclGenericApp_TaskID );
+  RegisterForKeys( zclTestApp_TaskID );
 
-  bdb_RegisterCommissioningStatusCB( zclGenericApp_ProcessCommissioningStatus );
-  bdb_RegisterIdentifyTimeChangeCB( zclGenericApp_ProcessIdentifyTimeChange );
-  bdb_RegisterBindNotificationCB( zclGenericApp_BindNotification );
+  bdb_RegisterCommissioningStatusCB( zclTestApp_ProcessCommissioningStatus );
+  bdb_RegisterIdentifyTimeChangeCB( zclTestApp_ProcessIdentifyTimeChange );
+  bdb_RegisterBindNotificationCB( zclTestApp_BindNotification );
 
 #if ( defined ( BDB_TL_TARGET ) && (BDB_TOUCHLINK_CAPABILITY_ENABLED == TRUE) )
-  bdb_RegisterTouchlinkTargetEnableCB( zclGenericApp_ProcessTouchlinkTargetEnable );
+  bdb_RegisterTouchlinkTargetEnableCB( zclTestApp_ProcessTouchlinkTargetEnable );
 #endif
 
 #ifdef ZCL_DIAGNOSTIC
   // Register the application's callback function to read/write attribute data.
   // This is only required when the attribute data format is unknown to ZCL.
-  zcl_registerReadWriteCB( GENERICAPP_ENDPOINT, zclDiagnostic_ReadWriteAttrCB, NULL );
+  zcl_registerReadWriteCB( TESTAPP_ENDPOINT, zclDiagnostic_ReadWriteAttrCB, NULL );
 
   if ( zclDiagnostic_InitStats() == ZSuccess )
   {
@@ -304,7 +304,7 @@ void zclGenericApp_Init( byte task_id )
  *
  * @return      none
  */
-uint16 zclGenericApp_event_loop( uint8 task_id, uint16 events )
+uint16 zclTestApp_event_loop( uint8 task_id, uint16 events )
 {
   afIncomingMSGPacket_t *MSGpkt;
 
@@ -312,29 +312,29 @@ uint16 zclGenericApp_event_loop( uint8 task_id, uint16 events )
 
   if ( events & SYS_EVENT_MSG )
   {
-    while ( (MSGpkt = (afIncomingMSGPacket_t *)osal_msg_receive( zclGenericApp_TaskID )) )
+    while ( (MSGpkt = (afIncomingMSGPacket_t *)osal_msg_receive( zclTestApp_TaskID )) )
     {
       switch ( MSGpkt->hdr.event )
       {
         case ZCL_INCOMING_MSG:
           // Incoming ZCL Foundation command/response messages
-          zclGenericApp_ProcessIncomingMsg( (zclIncomingMsg_t *)MSGpkt );
+          zclTestApp_ProcessIncomingMsg( (zclIncomingMsg_t *)MSGpkt );
           break;
 
         case KEY_CHANGE:
-          zclGenericApp_HandleKeys( ((keyChange_t *)MSGpkt)->state, ((keyChange_t *)MSGpkt)->keys );
+          zclTestApp_HandleKeys( ((keyChange_t *)MSGpkt)->state, ((keyChange_t *)MSGpkt)->keys );
           break;
 
         case ZDO_STATE_CHANGE:
-          zclGenericApp_NwkState = (devStates_t)(MSGpkt->hdr.status);
+          zclTestApp_NwkState = (devStates_t)(MSGpkt->hdr.status);
 
           // now on the network
-          if ( (zclGenericApp_NwkState == DEV_ZB_COORD) ||
-               (zclGenericApp_NwkState == DEV_ROUTER)   ||
-               (zclGenericApp_NwkState == DEV_END_DEVICE) )
+          if ( (zclTestApp_NwkState == DEV_ZB_COORD) ||
+               (zclTestApp_NwkState == DEV_ROUTER)   ||
+               (zclTestApp_NwkState == DEV_END_DEVICE) )
           {
             giGenAppScreenMode = GENERIC_MAINMODE;
-            zclGenericApp_LcdDisplayUpdate();
+            zclTestApp_LcdDisplayUpdate();
           }
           break;
 
@@ -350,45 +350,45 @@ uint16 zclGenericApp_event_loop( uint8 task_id, uint16 events )
     return (events ^ SYS_EVENT_MSG);
   }
 
-  if ( events & GENERICAPP_MAIN_SCREEN_EVT )
+  if ( events & TESTAPP_MAIN_SCREEN_EVT )
   {
     giGenAppScreenMode = GENERIC_MAINMODE;
-    zclGenericApp_LcdDisplayUpdate();
+    zclTestApp_LcdDisplayUpdate();
 
-    return ( events ^ GENERICAPP_MAIN_SCREEN_EVT );
+    return ( events ^ TESTAPP_MAIN_SCREEN_EVT );
   }
   
 #if ZG_BUILD_ENDDEVICE_TYPE    
-  if ( events & GENERICAPP_END_DEVICE_REJOIN_EVT )
+  if ( events & TESTAPP_END_DEVICE_REJOIN_EVT )
   {
     bdb_ZedAttemptRecoverNwk();
-    return ( events ^ GENERICAPP_END_DEVICE_REJOIN_EVT );
+    return ( events ^ TESTAPP_END_DEVICE_REJOIN_EVT );
   }
 #endif
 
-  /* GENERICAPP_TODO: handle app events here */
+  /* TESTAPP_TODO: handle app events here */
   
   
-  if ( events & GENERICAPP_EVT_1 )
+  if ( events & TESTAPP_EVT_1 )
   {
     // toggle LED 2 state, start another timer for 500ms
     HalLedSet ( HAL_LED_2, HAL_LED_MODE_TOGGLE );
-    osal_start_timerEx( zclGenericApp_TaskID, GENERICAPP_EVT_1, 500 );
+    osal_start_timerEx( zclTestApp_TaskID, TESTAPP_EVT_1, 500 );
     
-    return ( events ^ GENERICAPP_EVT_1 );
+    return ( events ^ TESTAPP_EVT_1 );
   }
   
   /*
-  if ( events & GENERICAPP_EVT_2 )
+  if ( events & TESTAPP_EVT_2 )
   {
     
-    return ( events ^ GENERICAPP_EVT_2 );
+    return ( events ^ TESTAPP_EVT_2 );
   }
   
-  if ( events & GENERICAPP_EVT_3 )
+  if ( events & TESTAPP_EVT_3 )
   {
     
-    return ( events ^ GENERICAPP_EVT_3 );
+    return ( events ^ TESTAPP_EVT_3 );
   }
   */
   
@@ -398,7 +398,7 @@ uint16 zclGenericApp_event_loop( uint8 task_id, uint16 events )
 
 
 /*********************************************************************
- * @fn      zclGenericApp_HandleKeys
+ * @fn      zclTestApp_HandleKeys
  *
  * @brief   Handles all key events for this device.
  *
@@ -411,7 +411,7 @@ uint16 zclGenericApp_event_loop( uint8 task_id, uint16 events )
  *
  * @return  none
  */
-static void zclGenericApp_HandleKeys( byte shift, byte keys )
+static void zclTestApp_HandleKeys( byte shift, byte keys )
 {
   if ( keys & HAL_KEY_SW_1 )
   {
@@ -419,21 +419,21 @@ static void zclGenericApp_HandleKeys( byte shift, byte keys )
     
     giGenAppScreenMode = GENERIC_MAINMODE;
     
-    /* GENERICAPP_TODO: add app functionality to hardware keys here */
+    /* TESTAPP_TODO: add app functionality to hardware keys here */
     
     // for example, start/stop LED 2 toggling with 500ms period
     if (LED_OnOff)
     { 
       // if the LED is blinking, stop the osal timer and turn the LED off
-      osal_stop_timerEx(zclGenericApp_TaskID, GENERICAPP_EVT_1);
+      osal_stop_timerEx(zclTestApp_TaskID, TESTAPP_EVT_1);
       HalLedSet ( HAL_LED_2, HAL_LED_MODE_OFF );
       LED_OnOff = FALSE;
     }
     else
     {
       // turn on LED 2 and start an osal timer to toggle it after 500ms, search
-      // for GENERICAPP_EVT_1 to see event handling after expired timer
-      osal_start_timerEx( zclGenericApp_TaskID, GENERICAPP_EVT_1, 500 );
+      // for TESTAPP_EVT_1 to see event handling after expired timer
+      osal_start_timerEx( zclTestApp_TaskID, TESTAPP_EVT_1, 500 );
       HalLedSet ( HAL_LED_2, HAL_LED_MODE_ON );
       LED_OnOff = TRUE;
     }
@@ -470,11 +470,11 @@ static void zclGenericApp_HandleKeys( byte shift, byte keys )
     bdb_resetLocalAction();
   }
 
-  zclGenericApp_LcdDisplayUpdate();
+  zclTestApp_LcdDisplayUpdate();
 }
 
 /*********************************************************************
- * @fn      zclGenericApp_LcdDisplayUpdate
+ * @fn      zclTestApp_LcdDisplayUpdate
  *
  * @brief   Called to update the LCD display.
  *
@@ -482,23 +482,23 @@ static void zclGenericApp_HandleKeys( byte shift, byte keys )
  *
  * @return  none
  */
-void zclGenericApp_LcdDisplayUpdate( void )
+void zclTestApp_LcdDisplayUpdate( void )
 {
 #ifdef LCD_SUPPORTED
   if ( giGenAppScreenMode == GENERIC_HELPMODE )
   {
-    zclGenericApp_LcdDisplayHelpMode();
+    zclTestApp_LcdDisplayHelpMode();
   }
   else
   {
-    zclGenericApp_LcdDisplayMainMode();
+    zclTestApp_LcdDisplayMainMode();
   }
 #endif
 }
 
 #ifdef LCD_SUPPORTED
 /*********************************************************************
- * @fn      zclGenericApp_LcdDisplayMainMode
+ * @fn      zclTestApp_LcdDisplayMainMode
  *
  * @brief   Called to display the main screen on the LCD.
  *
@@ -506,18 +506,18 @@ void zclGenericApp_LcdDisplayUpdate( void )
  *
  * @return  none
  */
-static void zclGenericApp_LcdDisplayMainMode( void )
+static void zclTestApp_LcdDisplayMainMode( void )
 {
   // display line 1 to indicate NWK status
-  if ( zclGenericApp_NwkState == DEV_ZB_COORD )
+  if ( zclTestApp_NwkState == DEV_ZB_COORD )
   {
     zclHA_LcdStatusLine1( ZCL_HA_STATUSLINE_ZC );
   }
-  else if ( zclGenericApp_NwkState == DEV_ROUTER )
+  else if ( zclTestApp_NwkState == DEV_ROUTER )
   {
     zclHA_LcdStatusLine1( ZCL_HA_STATUSLINE_ZR );
   }
-  else if ( zclGenericApp_NwkState == DEV_END_DEVICE )
+  else if ( zclTestApp_NwkState == DEV_END_DEVICE )
   {
     zclHA_LcdStatusLine1( ZCL_HA_STATUSLINE_ZED );
   }
@@ -535,7 +535,7 @@ static void zclGenericApp_LcdDisplayMainMode( void )
 }
 
 /*********************************************************************
- * @fn      zclGenericApp_LcdDisplayHelpMode
+ * @fn      zclTestApp_LcdDisplayHelpMode
  *
  * @brief   Called to display the SW options on the LCD.
  *
@@ -543,16 +543,16 @@ static void zclGenericApp_LcdDisplayMainMode( void )
  *
  * @return  none
  */
-static void zclGenericApp_LcdDisplayHelpMode( void )
+static void zclTestApp_LcdDisplayHelpMode( void )
 {
-  HalLcdWriteString( (char *)sSwGenericApp, HAL_LCD_LINE_1 );
+  HalLcdWriteString( (char *)sSwTestApp, HAL_LCD_LINE_1 );
   HalLcdWriteString( (char *)sSwBDBMode, HAL_LCD_LINE_2 );
   HalLcdWriteString( (char *)sSwHelp, HAL_LCD_LINE_3 );
 }
 #endif  // LCD_SUPPORTED
 
 /*********************************************************************
- * @fn      zclGenericApp_ProcessCommissioningStatus
+ * @fn      zclTestApp_ProcessCommissioningStatus
  *
  * @brief   Callback in which the status of the commissioning process are reported
  *
@@ -560,7 +560,7 @@ static void zclGenericApp_LcdDisplayHelpMode( void )
  *
  * @return  none
  */
-static void zclGenericApp_ProcessCommissioningStatus(bdbCommissioningModeMsg_t *bdbCommissioningModeMsg)
+static void zclTestApp_ProcessCommissioningStatus(bdbCommissioningModeMsg_t *bdbCommissioningModeMsg)
 {
   switch(bdbCommissioningModeMsg->bdbCommissioningMode)
   {
@@ -618,7 +618,7 @@ static void zclGenericApp_ProcessCommissioningStatus(bdbCommissioningModeMsg_t *
       else
       {
         //Parent not found, attempt to rejoin again after a fixed delay
-        osal_start_timerEx(zclGenericApp_TaskID, GENERICAPP_END_DEVICE_REJOIN_EVT, GENERICAPP_END_DEVICE_REJOIN_DELAY);
+        osal_start_timerEx(zclTestApp_TaskID, TESTAPP_END_DEVICE_REJOIN_EVT, TESTAPP_END_DEVICE_REJOIN_DELAY);
       }
     break;
 #endif 
@@ -626,7 +626,7 @@ static void zclGenericApp_ProcessCommissioningStatus(bdbCommissioningModeMsg_t *
 }
 
 /*********************************************************************
- * @fn      zclGenericApp_ProcessIdentifyTimeChange
+ * @fn      zclTestApp_ProcessIdentifyTimeChange
  *
  * @brief   Called to process any change to the IdentifyTime attribute.
  *
@@ -634,11 +634,11 @@ static void zclGenericApp_ProcessCommissioningStatus(bdbCommissioningModeMsg_t *
  *
  * @return  none
  */
-static void zclGenericApp_ProcessIdentifyTimeChange( uint8 endpoint )
+static void zclTestApp_ProcessIdentifyTimeChange( uint8 endpoint )
 {
   (void) endpoint;
 
-  if ( zclGenericApp_IdentifyTime > 0 )
+  if ( zclTestApp_IdentifyTime > 0 )
   {
     HalLedBlink ( HAL_LED_2, 0xFF, HAL_LED_DEFAULT_DUTY_CYCLE, HAL_LED_DEFAULT_FLASH_TIME );
   }
@@ -649,7 +649,7 @@ static void zclGenericApp_ProcessIdentifyTimeChange( uint8 endpoint )
 }
 
 /*********************************************************************
- * @fn      zclGenericApp_BindNotification
+ * @fn      zclTestApp_BindNotification
  *
  * @brief   Called when a new bind is added.
  *
@@ -657,14 +657,14 @@ static void zclGenericApp_ProcessIdentifyTimeChange( uint8 endpoint )
  *
  * @return  none
  */
-static void zclGenericApp_BindNotification( bdbBindNotificationData_t *data )
+static void zclTestApp_BindNotification( bdbBindNotificationData_t *data )
 {
-  // GENERICAPP_TODO: process the new bind information
+  // TESTAPP_TODO: process the new bind information
 }
 
 
 /*********************************************************************
- * @fn      zclGenericApp_ProcessTouchlinkTargetEnable
+ * @fn      zclTestApp_ProcessTouchlinkTargetEnable
  *
  * @brief   Called to process when the touchlink target functionality
  *          is enabled or disabled
@@ -674,7 +674,7 @@ static void zclGenericApp_BindNotification( bdbBindNotificationData_t *data )
  * @return  none
  */
 #if ( defined ( BDB_TL_TARGET ) && (BDB_TOUCHLINK_CAPABILITY_ENABLED == TRUE) )
-static void zclGenericApp_ProcessTouchlinkTargetEnable( uint8 enable )
+static void zclTestApp_ProcessTouchlinkTargetEnable( uint8 enable )
 {
   if ( enable )
   {
@@ -688,7 +688,7 @@ static void zclGenericApp_ProcessTouchlinkTargetEnable( uint8 enable )
 #endif
 
 /*********************************************************************
- * @fn      zclGenericApp_BasicResetCB
+ * @fn      zclTestApp_BasicResetCB
  *
  * @brief   Callback from the ZCL General Cluster Library
  *          to set all the Basic Cluster attributes to default values.
@@ -697,13 +697,13 @@ static void zclGenericApp_ProcessTouchlinkTargetEnable( uint8 enable )
  *
  * @return  none
  */
-static void zclGenericApp_BasicResetCB( void )
+static void zclTestApp_BasicResetCB( void )
 {
 
-  /* GENERICAPP_TODO: remember to update this function with any
+  /* TESTAPP_TODO: remember to update this function with any
      application-specific cluster attribute variables */
   
-  zclGenericApp_ResetAttributesToDefaultValues();
+  zclTestApp_ResetAttributesToDefaultValues();
   
 }
 /*********************************************************************
@@ -734,7 +734,7 @@ void zclSampleApp_BatteryWarningCB( uint8 voltLevel )
  *****************************************************************************/
 
 /*********************************************************************
- * @fn      zclGenericApp_ProcessIncomingMsg
+ * @fn      zclTestApp_ProcessIncomingMsg
  *
  * @brief   Process ZCL Foundation incoming message
  *
@@ -742,18 +742,18 @@ void zclSampleApp_BatteryWarningCB( uint8 voltLevel )
  *
  * @return  none
  */
-static void zclGenericApp_ProcessIncomingMsg( zclIncomingMsg_t *pInMsg )
+static void zclTestApp_ProcessIncomingMsg( zclIncomingMsg_t *pInMsg )
 {
   switch ( pInMsg->zclHdr.commandID )
   {
 #ifdef ZCL_READ
     case ZCL_CMD_READ_RSP:
-      zclGenericApp_ProcessInReadRspCmd( pInMsg );
+      zclTestApp_ProcessInReadRspCmd( pInMsg );
       break;
 #endif
 #ifdef ZCL_WRITE
     case ZCL_CMD_WRITE_RSP:
-      zclGenericApp_ProcessInWriteRspCmd( pInMsg );
+      zclTestApp_ProcessInWriteRspCmd( pInMsg );
       break;
 #endif
     case ZCL_CMD_CONFIG_REPORT:
@@ -765,23 +765,23 @@ static void zclGenericApp_ProcessIncomingMsg( zclIncomingMsg_t *pInMsg )
       break;
       
     case ZCL_CMD_DEFAULT_RSP:
-      zclGenericApp_ProcessInDefaultRspCmd( pInMsg );
+      zclTestApp_ProcessInDefaultRspCmd( pInMsg );
       break;
 #ifdef ZCL_DISCOVER
     case ZCL_CMD_DISCOVER_CMDS_RECEIVED_RSP:
-      zclGenericApp_ProcessInDiscCmdsRspCmd( pInMsg );
+      zclTestApp_ProcessInDiscCmdsRspCmd( pInMsg );
       break;
 
     case ZCL_CMD_DISCOVER_CMDS_GEN_RSP:
-      zclGenericApp_ProcessInDiscCmdsRspCmd( pInMsg );
+      zclTestApp_ProcessInDiscCmdsRspCmd( pInMsg );
       break;
 
     case ZCL_CMD_DISCOVER_ATTRS_RSP:
-      zclGenericApp_ProcessInDiscAttrsRspCmd( pInMsg );
+      zclTestApp_ProcessInDiscAttrsRspCmd( pInMsg );
       break;
 
     case ZCL_CMD_DISCOVER_ATTRS_EXT_RSP:
-      zclGenericApp_ProcessInDiscAttrsExtRspCmd( pInMsg );
+      zclTestApp_ProcessInDiscAttrsExtRspCmd( pInMsg );
       break;
 #endif
     default:
@@ -794,7 +794,7 @@ static void zclGenericApp_ProcessIncomingMsg( zclIncomingMsg_t *pInMsg )
 
 #ifdef ZCL_READ
 /*********************************************************************
- * @fn      zclGenericApp_ProcessInReadRspCmd
+ * @fn      zclTestApp_ProcessInReadRspCmd
  *
  * @brief   Process the "Profile" Read Response Command
  *
@@ -802,7 +802,7 @@ static void zclGenericApp_ProcessIncomingMsg( zclIncomingMsg_t *pInMsg )
  *
  * @return  none
  */
-static uint8 zclGenericApp_ProcessInReadRspCmd( zclIncomingMsg_t *pInMsg )
+static uint8 zclTestApp_ProcessInReadRspCmd( zclIncomingMsg_t *pInMsg )
 {
   zclReadRspCmd_t *readRspCmd;
   uint8 i;
@@ -821,7 +821,7 @@ static uint8 zclGenericApp_ProcessInReadRspCmd( zclIncomingMsg_t *pInMsg )
 
 #ifdef ZCL_WRITE
 /*********************************************************************
- * @fn      zclGenericApp_ProcessInWriteRspCmd
+ * @fn      zclTestApp_ProcessInWriteRspCmd
  *
  * @brief   Process the "Profile" Write Response Command
  *
@@ -829,7 +829,7 @@ static uint8 zclGenericApp_ProcessInReadRspCmd( zclIncomingMsg_t *pInMsg )
  *
  * @return  none
  */
-static uint8 zclGenericApp_ProcessInWriteRspCmd( zclIncomingMsg_t *pInMsg )
+static uint8 zclTestApp_ProcessInWriteRspCmd( zclIncomingMsg_t *pInMsg )
 {
   zclWriteRspCmd_t *writeRspCmd;
   uint8 i;
@@ -846,7 +846,7 @@ static uint8 zclGenericApp_ProcessInWriteRspCmd( zclIncomingMsg_t *pInMsg )
 #endif // ZCL_WRITE
 
 /*********************************************************************
- * @fn      zclGenericApp_ProcessInDefaultRspCmd
+ * @fn      zclTestApp_ProcessInDefaultRspCmd
  *
  * @brief   Process the "Profile" Default Response Command
  *
@@ -854,7 +854,7 @@ static uint8 zclGenericApp_ProcessInWriteRspCmd( zclIncomingMsg_t *pInMsg )
  *
  * @return  none
  */
-static uint8 zclGenericApp_ProcessInDefaultRspCmd( zclIncomingMsg_t *pInMsg )
+static uint8 zclTestApp_ProcessInDefaultRspCmd( zclIncomingMsg_t *pInMsg )
 {
   // zclDefaultRspCmd_t *defaultRspCmd = (zclDefaultRspCmd_t *)pInMsg->attrCmd;
 
@@ -866,7 +866,7 @@ static uint8 zclGenericApp_ProcessInDefaultRspCmd( zclIncomingMsg_t *pInMsg )
 
 #ifdef ZCL_DISCOVER
 /*********************************************************************
- * @fn      zclGenericApp_ProcessInDiscCmdsRspCmd
+ * @fn      zclTestApp_ProcessInDiscCmdsRspCmd
  *
  * @brief   Process the Discover Commands Response Command
  *
@@ -874,7 +874,7 @@ static uint8 zclGenericApp_ProcessInDefaultRspCmd( zclIncomingMsg_t *pInMsg )
  *
  * @return  none
  */
-static uint8 zclGenericApp_ProcessInDiscCmdsRspCmd( zclIncomingMsg_t *pInMsg )
+static uint8 zclTestApp_ProcessInDiscCmdsRspCmd( zclIncomingMsg_t *pInMsg )
 {
   zclDiscoverCmdsCmdRsp_t *discoverRspCmd;
   uint8 i;
@@ -889,7 +889,7 @@ static uint8 zclGenericApp_ProcessInDiscCmdsRspCmd( zclIncomingMsg_t *pInMsg )
 }
 
 /*********************************************************************
- * @fn      zclGenericApp_ProcessInDiscAttrsRspCmd
+ * @fn      zclTestApp_ProcessInDiscAttrsRspCmd
  *
  * @brief   Process the "Profile" Discover Attributes Response Command
  *
@@ -897,7 +897,7 @@ static uint8 zclGenericApp_ProcessInDiscCmdsRspCmd( zclIncomingMsg_t *pInMsg )
  *
  * @return  none
  */
-static uint8 zclGenericApp_ProcessInDiscAttrsRspCmd( zclIncomingMsg_t *pInMsg )
+static uint8 zclTestApp_ProcessInDiscAttrsRspCmd( zclIncomingMsg_t *pInMsg )
 {
   zclDiscoverAttrsRspCmd_t *discoverRspCmd;
   uint8 i;
@@ -912,7 +912,7 @@ static uint8 zclGenericApp_ProcessInDiscAttrsRspCmd( zclIncomingMsg_t *pInMsg )
 }
 
 /*********************************************************************
- * @fn      zclGenericApp_ProcessInDiscAttrsExtRspCmd
+ * @fn      zclTestApp_ProcessInDiscAttrsExtRspCmd
  *
  * @brief   Process the "Profile" Discover Attributes Extended Response Command
  *
@@ -920,7 +920,7 @@ static uint8 zclGenericApp_ProcessInDiscAttrsRspCmd( zclIncomingMsg_t *pInMsg )
  *
  * @return  none
  */
-static uint8 zclGenericApp_ProcessInDiscAttrsExtRspCmd( zclIncomingMsg_t *pInMsg )
+static uint8 zclTestApp_ProcessInDiscAttrsExtRspCmd( zclIncomingMsg_t *pInMsg )
 {
   zclDiscoverAttrsExtRsp_t *discoverRspCmd;
   uint8 i;

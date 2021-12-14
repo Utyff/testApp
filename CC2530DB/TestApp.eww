@@ -2,25 +2,25 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\GenericApp.ewp</path>
+    <path>$WS_DIR$\TestApp.ewp</path>
   </project>
   <batchBuild>
     <batchDefinition>
       <name>ALL</name>
       <member>
-        <project>GenericApp</project>
+        <project>TestApp</project>
         <configuration>CoordinatorEB</configuration>
       </member>
       <member>
-        <project>GenericApp</project>
+        <project>TestApp</project>
         <configuration>RouterEB</configuration>
       </member>
       <member>
-        <project>GenericApp</project>
+        <project>TestApp</project>
         <configuration>EndDeviceEB</configuration>
       </member>
       <member>
-        <project>GenericApp</project>
+        <project>TestApp</project>
         <configuration>RouterZLight</configuration>
       </member>
     </batchDefinition>

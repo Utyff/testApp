@@ -792,7 +792,7 @@
                 </option>
                 <option>
                     <name>OutputFile</name>
-                    <state>GenericApp.d51</state>
+                    <state>TestApp.d51</state>
                 </option>
                 <option>
                     <name>OutputFormat</name>
@@ -990,7 +990,7 @@
                 </option>
                 <option>
                     <name>ExtraOutputFile</name>
-                    <state>GenericApp.sim</state>
+                    <state>TestApp.sim</state>
                 </option>
                 <option>
                     <name>ExtraOutputFormat</name>
@@ -1951,7 +1951,7 @@
                 </option>
                 <option>
                     <name>OutputFile</name>
-                    <state>GenericApp.d51</state>
+                    <state>TestApp.d51</state>
                 </option>
                 <option>
                     <name>OutputFormat</name>
@@ -2149,7 +2149,7 @@
                 </option>
                 <option>
                     <name>ExtraOutputFile</name>
-                    <state>GenericApp.sim</state>
+                    <state>TestApp.sim</state>
                 </option>
                 <option>
                     <name>ExtraOutputFormat</name>
@@ -3111,7 +3111,7 @@
                 </option>
                 <option>
                     <name>OutputFile</name>
-                    <state>GenericApp.d51</state>
+                    <state>TestApp.d51</state>
                 </option>
                 <option>
                     <name>OutputFormat</name>
@@ -3309,7 +3309,7 @@
                 </option>
                 <option>
                     <name>ExtraOutputFile</name>
-                    <state>GenericApp.sim</state>
+                    <state>TestApp.sim</state>
                 </option>
                 <option>
                     <name>ExtraOutputFormat</name>
@@ -3481,16 +3481,16 @@
     <group>
         <name>App</name>
         <file>
-            <name>$PROJ_DIR$\..\Source\OSAL_GenericApp.c</name>
+            <name>$PROJ_DIR$\..\Source\OSAL_TestApp.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Source\zcl_genericapp.c</name>
+            <name>$PROJ_DIR$\..\Source\zcl_testapp.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Source\zcl_genericapp.h</name>
+            <name>$PROJ_DIR$\..\Source\zcl_testapp.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Source\zcl_genericapp_data.c</name>
+            <name>$PROJ_DIR$\..\Source\zcl_testapp_data.c</name>
         </file>
     </group>
     <group>

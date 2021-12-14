@@ -1,5 +1,5 @@
 /**************************************************************************************************
-  Filename:       OSAL_GenericApp.c
+  Filename:       OSAL_TestApp.c
   Revised:        $Date: 2008-02-07 12:10:00 -0800 (Thu, 07 Feb 2008) $
   Revision:       $Revision: 16360 $
 
@@ -23,7 +23,7 @@
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
@@ -79,7 +79,7 @@
 #endif // BDB_TL_TARGET
 #endif // INTER_PAN
 
-#include "zcl_genericapp.h"
+#include "zcl_testapp.h"
 
 /*********************************************************************
  * GLOBAL VARIABLES
@@ -118,7 +118,7 @@ const pTaskEventHandlerFn tasksArr[] = {
   #endif
   zcl_event_loop,
   bdb_event_loop,
-  zclGenericApp_event_loop
+  zclTestApp_event_loop
 };
 
 const uint8 tasksCnt = sizeof( tasksArr ) / sizeof( tasksArr[0] );
@@ -175,7 +175,7 @@ void osalInitTasks( void )
 #endif
   zcl_Init( taskID++ );
   bdb_Init( taskID++ );
-  zclGenericApp_Init( taskID );
+  zclTestApp_Init( taskID );
 }
 
 /*********************************************************************

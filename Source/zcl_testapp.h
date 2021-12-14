@@ -1,5 +1,5 @@
 /**************************************************************************************************
-  Filename:       zcl_genericapp.h
+  Filename:       zcl_testapp.h
   Revised:        $Date: 2014-06-19 08:38:22 -0700 (Thu, 19 Jun 2014) $
   Revision:       $Revision: 39101 $
 
@@ -23,7 +23,7 @@
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED ï¿½AS ISï¿½ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
@@ -38,8 +38,8 @@
   contact Texas Instruments Incorporated at www.TI.com.
 **************************************************************************************************/
 
-#ifndef ZCL_GENERICAPP_H
-#define ZCL_GENERICAPP_H
+#ifndef ZCL_TESTAPP_H
+#define ZCL_TESTAPP_H
 
 #ifdef __cplusplus
 extern "C"
@@ -61,29 +61,29 @@ extern "C"
 /*********************************************************************
  * CONSTANTS
  */
-#define GENERICAPP_ENDPOINT            8
+#define TESTAPP_ENDPOINT            8
 // Added to include ZLL Target functionality
-#define GENERICAPP_NUM_GRPS            2
+#define TESTAPP_NUM_GRPS            2
 
 
 // Application Events
-#define GENERICAPP_MAIN_SCREEN_EVT          0x0001
-#define GENERICAPP_LEVEL_CTRL_EVT           0x0002
-#define GENERICAPP_END_DEVICE_REJOIN_EVT    0x0004  
+#define TESTAPP_MAIN_SCREEN_EVT          0x0001
+#define TESTAPP_LEVEL_CTRL_EVT           0x0002
+#define TESTAPP_END_DEVICE_REJOIN_EVT    0x0004
   
-/* GENERICAPP_TODO: define app events here */
+/* TESTAPP_TODO: define app events here */
   
-#define GENERICAPP_EVT_1                    0x0008
+#define TESTAPP_EVT_1                    0x0008
 /*
-#define GENERICAPP_EVT_2                    0x0010
-#define GENERICAPP_EVT_3                    0x0020
+#define TESTAPP_EVT_2                    0x0010
+#define TESTAPP_EVT_3                    0x0020
 */
 
 // Application Display Modes
 #define GENERIC_MAINMODE      0x00
 #define GENERIC_HELPMODE      0x01
   
-#define GENERICAPP_END_DEVICE_REJOIN_DELAY 10000
+#define TESTAPP_END_DEVICE_REJOIN_DELAY 10000
 
 /*********************************************************************
  * MACROS
@@ -98,24 +98,24 @@ extern "C"
 
 // Added to include ZLL Target functionality
 #if defined ( BDB_TL_INITIATOR ) || defined ( BDB_TL_TARGET )
-  extern bdbTLDeviceInfo_t tlGenericApp_DeviceInfo;
+  extern bdbTLDeviceInfo_t tlTestApp_DeviceInfo;
 #endif
 
-extern SimpleDescriptionFormat_t zclGenericApp_SimpleDesc;
+extern SimpleDescriptionFormat_t zclTestApp_SimpleDesc;
 
-extern CONST zclCommandRec_t zclGenericApp_Cmds[];
+extern CONST zclCommandRec_t zclTestApp_Cmds[];
 
 extern CONST uint8 zclCmdsArraySize;
 
 // attribute list
-extern CONST zclAttrRec_t zclGenericApp_Attrs[];
-extern CONST uint8 zclGenericApp_NumAttributes;
+extern CONST zclAttrRec_t zclTestApp_Attrs[];
+extern CONST uint8 zclTestApp_NumAttributes;
 
 // Identify attributes
-extern uint16 zclGenericApp_IdentifyTime;
-extern uint8  zclGenericApp_IdentifyCommissionState;
+extern uint16 zclTestApp_IdentifyTime;
+extern uint8  zclTestApp_IdentifyCommissionState;
 
-// GENERICAPP_TODO: Declare application specific attributes here
+// TESTAPP_TODO: Declare application specific attributes here
 
 
 /*********************************************************************
@@ -125,17 +125,17 @@ extern uint8  zclGenericApp_IdentifyCommissionState;
  /*
   * Initialization for the task
   */
-extern void zclGenericApp_Init( byte task_id );
+extern void zclTestApp_Init( byte task_id );
 
 /*
  *  Event Process for the task
  */
-extern UINT16 zclGenericApp_event_loop( byte task_id, UINT16 events );
+extern UINT16 zclTestApp_event_loop( byte task_id, UINT16 events );
 
 /*
  *  Reset all writable attributes to their default values.
  */
-extern void zclGenericApp_ResetAttributesToDefaultValues(void);
+extern void zclTestApp_ResetAttributesToDefaultValues(void);
 
 
 /*********************************************************************
@@ -145,4 +145,4 @@ extern void zclGenericApp_ResetAttributesToDefaultValues(void);
 }
 #endif
 
-#endif /* ZCL_GENERICAPP_H */
+#endif /* ZCL_TESTAPP_H */
