@@ -69,7 +69,7 @@
  * CONSTANTS
  */
 
-#define TESTAPP_DEVICE_VERSION     0
+#define TESTAPP_DEVICE_VERSION     1
 #define TESTAPP_FLAGS              0
 
 #define TESTAPP_HWVERSION          1
@@ -93,9 +93,9 @@ const uint16 zclTestApp_clusterRevision_all = 0x0001;
 // Basic Cluster
 const uint8 zclTestApp_HWRevision = TESTAPP_HWVERSION;
 const uint8 zclTestApp_ZCLVersion = TESTAPP_ZCLVERSION;
-const uint8 zclTestApp_ManufacturerName[] = { 16, 'T','e','x','a','s','I','n','s','t','r','u','m','e','n','t','s' };
-const uint8 zclTestApp_ModelId[] = { 16, 'T','I','0','0','0','1',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' };
-const uint8 zclTestApp_DateCode[] = { 16, '2','0','0','6','0','8','3','1',' ',' ',' ',' ',' ',' ',' ',' ' };
+const uint8 zclTestApp_ManufacturerName[] = { 6, 'D','I','Y','R','u','Z' };
+const uint8 zclTestApp_ModelId[] = { 9, 'D','I','Y','R','u','Z','_','R','T' };
+const uint8 zclTestApp_DateCode[] = { 8, '2','0','2','1','1','2','1','9' };
 const uint8 zclTestApp_PowerSource = POWER_SOURCE_MAINS_1_PHASE;
 
 uint8 zclTestApp_LocationDescription[17] = { 16, ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' };

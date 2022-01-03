@@ -51,6 +51,7 @@ Module.symvers
 Mkfile.old
 dkms.conf
 *.dep
+*.ewt
 
 CC2530DB/RouterEB/
 CC2530DB/CoordinatorEB/

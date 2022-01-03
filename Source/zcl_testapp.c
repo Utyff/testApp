@@ -119,6 +119,9 @@ byte zclTestApp_TaskID;
  * LOCAL VARIABLES
  */
 
+// Состояние кнопок
+static uint8 halKeySavedKeys;
+
 uint8 giGenAppScreenMode = GENERIC_MAINMODE;   // display the main screen mode first
 
 uint8 gPermitDuration = 0;    // permit joining default to disabled
@@ -287,12 +290,8 @@ void zclTestApp_Init( byte task_id )
   }
 #endif
 
-
-#ifdef LCD_SUPPORTED
-  HalLcdWriteString ( (char *)sDeviceName, HAL_LCD_LINE_3 );
-#endif  // LCD_SUPPORTED
-
-
+    // Старт процесса возвращения в сеть
+    bdb_StartCommissioning(BDB_COMMISSIONING_MODE_NWK_STEERING | BDB_COMMISSIONING_MODE_FINDING_BINDING);
 }
 
 /*********************************************************************
@@ -938,4 +937,21 @@ static uint8 zclTestApp_ProcessInDiscAttrsExtRspCmd( zclIncomingMsg_t *pInMsg )
 /****************************************************************************
 ****************************************************************************/
 
+// Инициализация работы кнопок (входов)
+void TestApp_HalKeyInit( void )
+{
+    /* Сбрасываем сохраняемое состояние кнопок в 0 */
+    halKeySavedKeys = 0;
 
+    PUSH1_SEL &= ~(PUSH1_BV); /* Выставляем функцию пина - GPIO */
+    PUSH1_DIR &= ~(PUSH1_BV); /* Выставляем режим пина - Вход */
+
+    PUSH1_ICTL &= ~(PUSH1_ICTLBIT); /* Не генерируем прерывания на пине */
+    PUSH1_IEN &= ~(PUSH1_IENBIT);   /* Очищаем признак включения прерываний */
+
+    PUSH2_SEL &= ~(PUSH2_BV); /* Set pin function to GPIO */
+    PUSH2_DIR &= ~(PUSH2_BV); /* Set pin direction to Input */
+
+    PUSH2_ICTL &= ~(PUSH2_ICTLBIT); /* don't generate interrupt */
+    PUSH2_IEN &= ~(PUSH2_IENBIT);   /* Clear interrupt enable bit */
+}
