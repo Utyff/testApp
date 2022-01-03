@@ -62,6 +62,15 @@ extern "C"
  * CONSTANTS
  */
 #define TESTAPP_ENDPOINT            1
+// События приложения
+#define TESTAPP_EVT_BLINK                0x0001
+#define TESTAPP_EVT_LONG                 0x0002
+#define TESTAPP_END_DEVICE_REJOIN_EVT    0x0004
+#define TESTAPP_REPORTING_EVT            0x0008
+
+// NVM IDs
+#define NV_TESTAPP_RELAY_STATE_ID        0x0402
+
 // Added to include ZLL Target functionality
 #define TESTAPP_NUM_GRPS            2
 
@@ -137,6 +146,9 @@ extern UINT16 zclTestApp_event_loop( byte task_id, UINT16 events );
  */
 extern void zclTestApp_ResetAttributesToDefaultValues(void);
 
+// Функции работы с кнопками
+extern void TestApp_HalKeyInit(void);
+extern void TestApp_HalKeyPoll(void);
 
 /*********************************************************************
 *********************************************************************/

@@ -54,7 +54,7 @@
   #define LED2_BV           BV(0)
   #define LED2_SBIT         P1_0
   #define LED2_DDR          P1DIR
-  #define LED2_POLARITY     ACTIVE_LOW
+  #define LED2_POLARITY     ACTIVE_HIGH
 #else
 /* 1 - P1_0 Зеленый */
 #define LED1_BV           BV(0)

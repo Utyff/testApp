@@ -90,6 +90,7 @@
 #include "hal_lcd.h"
 #include "hal_led.h"
 #include "hal_key.h"
+#include "hal_drivers.h"
 
 /*********************************************************************
  * MACROS
@@ -290,6 +291,9 @@ void zclTestApp_Init( byte task_id )
   }
 #endif
 
+    // запускаем повторяемый таймер события HAL_KEY_EVENT через 100мс
+    osal_start_reload_timer( zclTestApp_TaskID, HAL_KEY_EVENT, 100);
+
     // Старт процесса возвращения в сеть
     bdb_StartCommissioning(BDB_COMMISSIONING_MODE_NWK_STEERING | BDB_COMMISSIONING_MODE_FINDING_BINDING);
 }
@@ -376,21 +380,24 @@ uint16 zclTestApp_event_loop( uint8 task_id, uint16 events )
     
     return ( events ^ TESTAPP_EVT_1 );
   }
-  
-  /*
-  if ( events & TESTAPP_EVT_2 )
-  {
-    
-    return ( events ^ TESTAPP_EVT_2 );
-  }
-  
-  if ( events & TESTAPP_EVT_3 )
-  {
-    
-    return ( events ^ TESTAPP_EVT_3 );
-  }
-  */
-  
+
+
+    if ( events & TESTAPP_EVT_BLINK )
+    {
+        // переключим светодиод
+        HalLedSet( HAL_LED_2, HAL_LED_MODE_TOGGLE );
+        return ( events ^ TESTAPP_EVT_BLINK );
+    }
+
+    // событие опроса кнопок
+    if (events & HAL_KEY_EVENT)
+    {
+        /* Считывание кнопок */
+        TestApp_HalKeyPoll();
+
+        return events ^ HAL_KEY_EVENT;
+    }
+
   // Discard unknown events
   return 0;
 }
@@ -444,32 +451,7 @@ static void zclTestApp_HandleKeys( byte shift, byte keys )
 
     bdb_StartCommissioning(BDB_COMMISSIONING_MODE_NWK_FORMATION | BDB_COMMISSIONING_MODE_NWK_STEERING | BDB_COMMISSIONING_MODE_FINDING_BINDING | BDB_COMMISSIONING_MODE_INITIATOR_TL);
   }
-  if ( keys & HAL_KEY_SW_3 )
-  {
-    giGenAppScreenMode = GENERIC_MAINMODE;
-  
-    // touchlink target commissioning, if enabled  
-#if ( defined ( BDB_TL_TARGET ) && (BDB_TOUCHLINK_CAPABILITY_ENABLED == TRUE) )
-    bdb_StartCommissioning(BDB_COMMISSIONING_MODE_FINDING_BINDING);
-    touchLinkTarget_EnableCommissioning( 30000 );
-#endif
-    
-  }
-  if ( keys & HAL_KEY_SW_4 )
-  {
-    
-   giGenAppScreenMode = giGenAppScreenMode ? GENERIC_MAINMODE : GENERIC_HELPMODE;
-#ifdef LCD_SUPPORTED
-    HalLcdWriteString( (char *)sClearLine, HAL_LCD_LINE_2 );
-#endif
-    
-  }
-  if ( keys & HAL_KEY_SW_5 )
-  {
-    bdb_resetLocalAction();
-  }
 
-  zclTestApp_LcdDisplayUpdate();
 }
 
 /*********************************************************************
@@ -954,4 +936,33 @@ void TestApp_HalKeyInit( void )
 
     PUSH2_ICTL &= ~(PUSH2_ICTLBIT); /* don't generate interrupt */
     PUSH2_IEN &= ~(PUSH2_IENBIT);   /* Clear interrupt enable bit */
+}
+
+// Считывание кнопок
+void TestApp_HalKeyPoll (void)
+{
+    uint8 keys = 0;
+
+    // нажата кнопка 1 ?
+    if (HAL_PUSH_BUTTON1())
+    {
+        keys |= HAL_KEY_SW_1;
+    }
+
+    // нажата кнопка 2 ?
+    if (HAL_PUSH_BUTTON2())
+    {
+        keys |= HAL_KEY_SW_2;
+    }
+
+    if (keys == halKeySavedKeys)
+    {
+        // Выход - нет изменений
+        return;
+    }
+    // Сохраним текущее состояние кнопок для сравнения в след раз
+    halKeySavedKeys = keys;
+
+    // Вызовем генерацию события изменений кнопок
+    OnBoard_SendKeys(keys, HAL_KEY_STATE_NORMAL);
 }
