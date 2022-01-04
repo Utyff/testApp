@@ -76,7 +76,7 @@ extern "C"
 
 
 // Application Events
-#define TESTAPP_MAIN_SCREEN_EVT          0x0001
+//#define TESTAPP_MAIN_SCREEN_EVT          0x0001
 #define TESTAPP_LEVEL_CTRL_EVT           0x0002
 #define TESTAPP_END_DEVICE_REJOIN_EVT    0x0004
   

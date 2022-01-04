@@ -363,13 +363,13 @@ uint16 zclTestApp_event_loop( uint8 task_id, uint16 events )
     return (events ^ SYS_EVENT_MSG);
   }
 
-  if ( events & TESTAPP_MAIN_SCREEN_EVT )
-  {
-    giGenAppScreenMode = GENERIC_MAINMODE;
-    zclTestApp_LcdDisplayUpdate();
-
-    return ( events ^ TESTAPP_MAIN_SCREEN_EVT );
-  }
+//  if ( events & TESTAPP_MAIN_SCREEN_EVT )
+//  {
+//    giGenAppScreenMode = GENERIC_MAINMODE;
+//    zclTestApp_LcdDisplayUpdate();
+//
+//    return ( events ^ TESTAPP_MAIN_SCREEN_EVT );
+//  }
   
 #if ZG_BUILD_ENDDEVICE_TYPE    
   if ( events & TESTAPP_END_DEVICE_REJOIN_EVT )
