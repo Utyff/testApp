@@ -73,7 +73,7 @@
 #define LED3_BV           BV(4)
 #define LED3_SBIT         P1_4
 #define LED3_DDR          P1DIR
-#define LED3_POLARITY     ACTIVE_LOW
+#define LED3_POLARITY     ACTIVE_HIGH
 
 #define LED4_BV
 #define LED4_SBIT
@@ -115,7 +115,7 @@
 /* S2 - P2_0 */
 #define PUSH2_BV          BV(0)
 #define PUSH2_SBIT        P2_0
-#define PUSH2_POLARITY    ACTIVE_HIGH
+#define PUSH2_POLARITY    ACTIVE_LOW
 #define PUSH2_PORT        P2
 #define PUSH2_SEL         P2SEL
 #define PUSH2_DIR         P2DIR

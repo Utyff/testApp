@@ -122,6 +122,8 @@ byte zclTestApp_TaskID;
 
 // Состояние кнопок
 static uint8 halKeySavedKeys;
+// Состояние реле
+uint8 RELAY_STATE = 0;
 
 uint8 giGenAppScreenMode = GENERIC_MAINMODE;   // display the main screen mode first
 
@@ -166,6 +168,13 @@ static uint8 zclTestApp_ProcessInDiscAttrsExtRspCmd( zclIncomingMsg_t *pInMsg );
 #endif
 
 static void zclSampleApp_BatteryWarningCB( uint8 voltLevel);
+
+// Изменение состояние реле
+static void updateRelay( bool );
+// Отображение состояния реле на пинах
+static void applyRelay( void );
+// Выход из сети
+void zclTestApp_LeaveNetwork( void );
 
 /*********************************************************************
  * STATUS STRINGS
@@ -295,7 +304,8 @@ void zclTestApp_Init( byte task_id )
     osal_start_reload_timer( zclTestApp_TaskID, HAL_KEY_EVENT, 100);
 
     // Старт процесса возвращения в сеть
-    bdb_StartCommissioning(BDB_COMMISSIONING_MODE_NWK_STEERING | BDB_COMMISSIONING_MODE_FINDING_BINDING);
+//    bdb_StartCommissioning(BDB_COMMISSIONING_MODE_NWK_STEERING | BDB_COMMISSIONING_MODE_FINDING_BINDING);
+    bdb_StartCommissioning(BDB_COMMISSIONING_MODE_PARENT_LOST);
 }
 
 /*********************************************************************
@@ -385,8 +395,34 @@ uint16 zclTestApp_event_loop( uint8 task_id, uint16 events )
     if ( events & TESTAPP_EVT_BLINK )
     {
         // переключим светодиод
-        HalLedSet( HAL_LED_2, HAL_LED_MODE_TOGGLE );
+        HalLedSet( HAL_LED_3, HAL_LED_MODE_TOGGLE );
         return ( events ^ TESTAPP_EVT_BLINK );
+    }
+
+    // событие TESTAPP_EVT_LONG
+    if ( events & TESTAPP_EVT_LONG )
+    {
+        // Проверяем текущее состояние устройства
+        // В сети или не в сети?
+        if ( bdbAttributes.bdbNodeIsOnANetwork )
+        {
+            // покидаем сеть
+            zclTestApp_LeaveNetwork();
+        }
+        else
+        {
+            // инициируем вход в сеть
+            bdb_StartCommissioning(
+                    BDB_COMMISSIONING_MODE_NWK_FORMATION |
+                    BDB_COMMISSIONING_MODE_NWK_STEERING |
+                    BDB_COMMISSIONING_MODE_FINDING_BINDING |
+                    BDB_COMMISSIONING_MODE_INITIATOR_TL
+            );
+            // будем мигать, пока не подключимся
+            osal_start_timerEx(zclTestApp_TaskID, TESTAPP_EVT_BLINK, 500);
+        }
+
+        return ( events ^ TESTAPP_EVT_LONG );
     }
 
     // событие опроса кнопок
@@ -419,7 +455,20 @@ uint16 zclTestApp_event_loop( uint8 task_id, uint16 events )
  */
 static void zclTestApp_HandleKeys( byte shift, byte keys )
 {
-  if ( keys & HAL_KEY_SW_1 )
+    if ( keys & HAL_KEY_SW_1 )
+    {
+        // Запускаем таймер для определения долгого нажатия - 5 сек
+        osal_start_timerEx(zclTestApp_TaskID, TESTAPP_EVT_LONG, 5000);
+        // Переключаем реле
+        updateRelay(RELAY_STATE == 0);
+    }
+    else
+    {
+        // Останавливаем таймер ожидания долгого нажатия
+        osal_stop_timerEx(zclTestApp_TaskID, TESTAPP_EVT_LONG);
+    }
+
+  if ( keys & HAL_KEY_SW_2 )
   {
     static bool LED_OnOff = FALSE;
     
@@ -445,7 +494,7 @@ static void zclTestApp_HandleKeys( byte shift, byte keys )
     }
   }
   // Start the BDB commissioning method
-  if ( keys & HAL_KEY_SW_2 )
+  if ( keys & HAL_KEY_SW_3 )
   {
     giGenAppScreenMode = GENERIC_MAINMODE;
 
@@ -619,14 +668,14 @@ static void zclTestApp_ProcessIdentifyTimeChange( uint8 endpoint )
 {
   (void) endpoint;
 
-  if ( zclTestApp_IdentifyTime > 0 )
-  {
-    HalLedBlink ( HAL_LED_2, 0xFF, HAL_LED_DEFAULT_DUTY_CYCLE, HAL_LED_DEFAULT_FLASH_TIME );
-  }
-  else
-  {
-    HalLedSet ( HAL_LED_2, HAL_LED_MODE_OFF );
-  }
+//  if ( zclTestApp_IdentifyTime > 0 )
+//  {
+//    HalLedBlink ( HAL_LED_2, 0xFF, HAL_LED_DEFAULT_DUTY_CYCLE, HAL_LED_DEFAULT_FLASH_TIME );
+//  }
+//  else
+//  {
+//    HalLedSet ( HAL_LED_2, HAL_LED_MODE_OFF );
+//  }
 }
 
 /*********************************************************************
@@ -657,14 +706,14 @@ static void zclTestApp_BindNotification( bdbBindNotificationData_t *data )
 #if ( defined ( BDB_TL_TARGET ) && (BDB_TOUCHLINK_CAPABILITY_ENABLED == TRUE) )
 static void zclTestApp_ProcessTouchlinkTargetEnable( uint8 enable )
 {
-  if ( enable )
-  {
-    HalLedSet ( HAL_LED_1, HAL_LED_MODE_ON );
-  }
-  else
-  {
-    HalLedSet ( HAL_LED_1, HAL_LED_MODE_OFF );
-  }
+//  if ( enable )
+//  {
+//    HalLedSet ( HAL_LED_1, HAL_LED_MODE_ON );
+//  }
+//  else
+//  {
+//    HalLedSet ( HAL_LED_1, HAL_LED_MODE_OFF );
+//  }
 }
 #endif
 
@@ -965,4 +1014,55 @@ void TestApp_HalKeyPoll (void)
 
     // Вызовем генерацию события изменений кнопок
     OnBoard_SendKeys(keys, HAL_KEY_STATE_NORMAL);
+}
+
+// Изменение состояния реле
+void updateRelay ( bool value )
+{
+    if (value) {
+        RELAY_STATE = 1;
+    } else {
+        RELAY_STATE = 0;
+    }
+    // сохраняем состояние реле
+    osal_nv_write(NV_TESTAPP_RELAY_STATE_ID, 0, 1, &RELAY_STATE);
+    // Отображаем новое состояние
+    applyRelay();
+    // отправляем отчет
+//    zclTestApp_ReportOnOff();
+}
+
+// Применение состояние реле
+void applyRelay ( void )
+{
+    // если выключено
+    if (RELAY_STATE == 0) {
+        // то гасим светодиод 1
+        HalLedSet ( HAL_LED_1, HAL_LED_MODE_OFF );
+    } else {
+        // иначе включаем светодиод 1
+        HalLedSet ( HAL_LED_1, HAL_LED_MODE_ON );
+    }
+}
+
+// Инициализация выхода из сети
+void zclTestApp_LeaveNetwork( void )
+{
+    zclTestApp_ResetAttributesToDefaultValues();
+
+    NLME_LeaveReq_t leaveReq;
+    // Set every field to 0
+    osal_memset(&leaveReq, 0, sizeof(NLME_LeaveReq_t));
+
+    // This will enable the device to rejoin the network after reset.
+    leaveReq.rejoin = FALSE;
+
+    // Set the NV startup option to force a "new" join.
+    zgWriteStartupOptions(ZG_STARTUP_SET, ZCD_STARTOPT_DEFAULT_NETWORK_STATE);
+
+    // Leave the network, and reset afterwards
+    if (NLME_LeaveReq(&leaveReq) != ZSuccess) {
+        // Couldn't send out leave; prepare to reset anyway
+        ZDApp_LeaveReset(FALSE);
+    }
 }
