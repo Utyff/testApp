@@ -150,6 +150,9 @@ extern void zclTestApp_ResetAttributesToDefaultValues(void);
 extern void TestApp_HalKeyInit(void);
 extern void TestApp_HalKeyPoll(void);
 
+// Функции команд управления
+static void zclTestApp_OnOffCB(uint8);
+
 /*********************************************************************
 *********************************************************************/
 

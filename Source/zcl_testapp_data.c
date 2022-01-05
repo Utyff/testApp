@@ -49,6 +49,7 @@
 #include "zcl.h"
 #include "zcl_general.h"
 #include "zcl_ha.h"
+#include "zcl_ms.h"
 
 /* TESTAPP_TODO: Include any of the header files below to access specific cluster data
 #include "zcl_poll_control.h"
@@ -105,6 +106,17 @@ uint8 zclTestApp_DeviceEnable = DEVICE_ENABLED;
 // Identify Cluster
 uint16 zclTestApp_IdentifyTime;
 
+// Состояние реле
+extern uint8 RELAY_STATE;
+
+// Данные о температуре
+#define MAX_MEASURED_VALUE  10000  // 100.00C
+#define MIN_MEASURED_VALUE  -10000  // -100.00C
+
+extern int16 zclTestApp_MeasuredValue;
+const int16 zclTestApp_MinMeasuredValue = MIN_MEASURED_VALUE;
+const uint16 zclTestApp_MaxMeasuredValue = MAX_MEASURED_VALUE;
+
 /* TESTAPP_TODO: declare attribute variables here. If its value can change,
  * initialize it in zclTestApp_ResetAttributesToDefaultValues. If its
  * value will not change, initialize it here.
@@ -146,6 +158,33 @@ CONST zclAttrRec_t zclTestApp_Attrs[] =
       ZCL_DATATYPE_UINT8,
       ACCESS_CONTROL_READ,
       (void *)&zclTestApp_ZCLVersion
+    }
+  },
+  {
+    ZCL_CLUSTER_ID_GEN_BASIC,
+    { // версия приложения
+      ATTRID_BASIC_APPL_VERSION,
+      ZCL_DATATYPE_UINT8,
+      ACCESS_CONTROL_READ,
+      (void *)&zclTestApp_ZCLVersion
+    }
+  },
+  {
+    ZCL_CLUSTER_ID_GEN_BASIC,
+    { // версия стека
+      ATTRID_BASIC_STACK_VERSION,
+      ZCL_DATATYPE_UINT8,
+      ACCESS_CONTROL_READ,
+      (void *)&zclTestApp_ZCLVersion
+    }
+  },
+  {
+    ZCL_CLUSTER_ID_GEN_BASIC,
+    { // версия прошивки
+      ATTRID_BASIC_SW_BUILD_ID,
+      ZCL_DATATYPE_CHAR_STR,
+      ACCESS_CONTROL_READ,
+      (void *)zclTestApp_DateCode
     }
   },
   {
@@ -236,6 +275,62 @@ CONST zclAttrRec_t zclTestApp_Attrs[] =
   {
     ZCL_CLUSTER_ID_GEN_IDENTIFY,
     {  // Attribute record
+      ATTRID_CLUSTER_REVISION,
+      ZCL_DATATYPE_UINT16,
+      ACCESS_CONTROL_READ,
+      (void *)&zclTestApp_clusterRevision_all
+    }
+  },
+  // *** Атрибуты On/Off кластера ***
+  {
+    ZCL_CLUSTER_ID_GEN_ON_OFF,
+    { // состояние
+      ATTRID_ON_OFF,
+      ZCL_DATATYPE_BOOLEAN,
+      ACCESS_CONTROL_READ,
+      (void *)&RELAY_STATE
+    }
+  },
+  {
+    ZCL_CLUSTER_ID_GEN_ON_OFF,
+    {  // версия On/Off кластера
+      ATTRID_CLUSTER_REVISION,
+      ZCL_DATATYPE_UINT16,
+      ACCESS_CONTROL_READ | ACCESS_CLIENT,
+      (void *)&zclTestApp_clusterRevision_all
+    }
+  },
+  // *** Атрибуты Temperature Measurement кластера ***
+  {
+    ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT,
+    { // Значение температуры
+      ATTRID_MS_TEMPERATURE_MEASURED_VALUE,
+      ZCL_DATATYPE_INT16,
+      ACCESS_CONTROL_READ | ACCESS_REPORTABLE,
+      (void *)&zclTestApp_MeasuredValue
+    }
+  },
+  {
+    ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT,
+    { // минимальное значение температуры
+      ATTRID_MS_TEMPERATURE_MIN_MEASURED_VALUE,
+      ZCL_DATATYPE_INT16,
+      ACCESS_CONTROL_READ,
+      (void *)&zclTestApp_MinMeasuredValue
+    }
+  },
+  {
+    ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT,
+    { // максимальное значение температуры
+      ATTRID_MS_TEMPERATURE_MAX_MEASURED_VALUE,
+      ZCL_DATATYPE_INT16,
+      ACCESS_CONTROL_READ,
+      (void *)&zclTestApp_MaxMeasuredValue
+    }
+  },
+  {
+    ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT,
+    {  // версия кластера
       ATTRID_CLUSTER_REVISION,
       ZCL_DATATYPE_UINT16,
       ACCESS_CONTROL_READ,

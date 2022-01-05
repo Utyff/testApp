@@ -64,6 +64,7 @@
 #include "zcl.h"
 #include "zcl_general.h"
 #include "zcl_ha.h"
+#include "zcl_ms.h"
 #include "zcl_diagnostic.h"
 #include "zcl_testapp.h"
 
@@ -125,6 +126,14 @@ static uint8 halKeySavedKeys;
 // Состояние реле
 uint8 RELAY_STATE = 0;
 
+// Данные о температуре
+int16 zclTestApp_MeasuredValue;
+
+// Структура для отправки отчета
+afAddrType_t zclTestApp_DstAddr;
+// Номер сообщения
+uint8 SeqNum = 0;
+
 uint8 giGenAppScreenMode = GENERIC_MAINMODE;   // display the main screen mode first
 
 uint8 gPermitDuration = 0;    // permit joining default to disabled
@@ -175,6 +184,10 @@ static void updateRelay( bool );
 static void applyRelay( void );
 // Выход из сети
 void zclTestApp_LeaveNetwork( void );
+// Отправка отчета о состоянии реле
+void zclTestApp_ReportOnOff( void );
+// Отправка отчета о температуре
+void zclTestApp_ReportTemp( void );
 
 /*********************************************************************
  * STATUS STRINGS
@@ -194,7 +207,7 @@ static zclGeneral_AppCallbacks_t zclTestApp_CmdCallbacks =
 {
   zclTestApp_BasicResetCB,             // Basic Cluster Reset command
   NULL,                                   // Identify Trigger Effect command
-  NULL,                                   // On/Off cluster commands
+  zclTestApp_OnOffCB,                     // On/Off cluster commands
   NULL,                                   // On/Off cluster enhanced command Off with Effect
   NULL,                                   // On/Off cluster enhanced command On with Recall Global Scene
   NULL,                                   // On/Off cluster enhanced command On with Timed Off
@@ -299,6 +312,19 @@ void zclTestApp_Init( byte task_id )
     // Here the user could start the timer to save Diagnostics to NV
   }
 #endif
+
+    // Установка адреса и эндпоинта для отправки отчета
+    zclTestApp_DstAddr.addrMode = (afAddrMode_t)AddrNotPresent;
+    zclTestApp_DstAddr.endPoint = 0;
+    zclTestApp_DstAddr.addr.shortAddr = 0;
+
+    // инициализируем NVM для хранения RELAY STATE
+    if ( SUCCESS == osal_nv_item_init( NV_TESTAPP_RELAY_STATE_ID, 1, &RELAY_STATE ) ) {
+        // читаем значение RELAY STATE из памяти
+        osal_nv_read( NV_TESTAPP_RELAY_STATE_ID, 0, 1, &RELAY_STATE );
+    }
+    // применяем состояние реле
+    applyRelay();
 
     // запускаем повторяемый таймер события HAL_KEY_EVENT через 100мс
     osal_start_reload_timer( zclTestApp_TaskID, HAL_KEY_EVENT, 100);
@@ -1029,7 +1055,7 @@ void updateRelay ( bool value )
     // Отображаем новое состояние
     applyRelay();
     // отправляем отчет
-//    zclTestApp_ReportOnOff();
+    zclTestApp_ReportOnOff();
 }
 
 // Применение состояние реле
@@ -1065,4 +1091,84 @@ void zclTestApp_LeaveNetwork( void )
         // Couldn't send out leave; prepare to reset anyway
         ZDApp_LeaveReset(FALSE);
     }
+}
+
+// Обработчик команд кластера OnOff
+static void zclTestApp_OnOffCB(uint8 cmd)
+{
+    // запомним адрес откуда пришла команда
+    // чтобы отправить обратно отчет
+    afIncomingMSGPacket_t *pPtr = zcl_getRawAFMsg();
+    zclTestApp_DstAddr.addr.shortAddr = pPtr->srcAddr.addr.shortAddr;
+
+    // Включить
+    if (cmd == COMMAND_ON) {
+        updateRelay(TRUE);
+    }
+    // Выключить
+    else if (cmd == COMMAND_OFF) {
+        updateRelay(FALSE);
+    }
+    // Переключить
+    else if (cmd == COMMAND_TOGGLE) {
+        updateRelay(RELAY_STATE == 0);
+    }
+}
+
+// Информирование о состоянии реле
+void zclTestApp_ReportOnOff(void) {
+    const uint8 NUM_ATTRIBUTES = 1;
+
+    zclReportCmd_t *pReportCmd;
+
+    pReportCmd = osal_mem_alloc(sizeof(zclReportCmd_t) +
+                                (NUM_ATTRIBUTES * sizeof(zclReport_t)));
+    if (pReportCmd != NULL) {
+        pReportCmd->numAttr = NUM_ATTRIBUTES;
+
+        pReportCmd->attrList[0].attrID = ATTRID_ON_OFF;
+        pReportCmd->attrList[0].dataType = ZCL_DATATYPE_BOOLEAN;
+        pReportCmd->attrList[0].attrData = (void *)(&RELAY_STATE);
+
+        zclTestApp_DstAddr.addrMode = (afAddrMode_t)Addr16Bit;
+        zclTestApp_DstAddr.addr.shortAddr = 0;
+        zclTestApp_DstAddr.endPoint = 1;
+
+        zcl_SendReportCmd(TESTAPP_ENDPOINT, &zclTestApp_DstAddr,
+                          ZCL_CLUSTER_ID_GEN_ON_OFF, pReportCmd,
+                          ZCL_FRAME_CLIENT_SERVER_DIR, false, SeqNum++);
+    }
+
+    osal_mem_free(pReportCmd);
+}
+
+// Информирование о температуре
+void zclTestApp_ReportTemp( void )
+{
+    // читаем температуру
+    zclTestApp_MeasuredValue = 160; //readTemperature();
+
+    const uint8 NUM_ATTRIBUTES = 1;
+
+    zclReportCmd_t *pReportCmd;
+
+    pReportCmd = osal_mem_alloc(sizeof(zclReportCmd_t) +
+                                (NUM_ATTRIBUTES * sizeof(zclReport_t)));
+    if (pReportCmd != NULL) {
+        pReportCmd->numAttr = NUM_ATTRIBUTES;
+
+        pReportCmd->attrList[0].attrID = ATTRID_MS_TEMPERATURE_MEASURED_VALUE;
+        pReportCmd->attrList[0].dataType = ZCL_DATATYPE_INT16;
+        pReportCmd->attrList[0].attrData = (void *)(&zclTestApp_MeasuredValue);
+
+        zclTestApp_DstAddr.addrMode = (afAddrMode_t)Addr16Bit;
+        zclTestApp_DstAddr.addr.shortAddr = 0;
+        zclTestApp_DstAddr.endPoint = 1;
+
+        zcl_SendReportCmd(TESTAPP_ENDPOINT, &zclTestApp_DstAddr,
+                          ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT, pReportCmd,
+                          ZCL_FRAME_CLIENT_SERVER_DIR, false, SeqNum++);
+    }
+
+    osal_mem_free(pReportCmd);
 }
