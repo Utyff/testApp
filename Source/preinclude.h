@@ -26,4 +26,10 @@
 
 #define HAL_SONOFF // признак сборки для Sonoff Zigbee
 
+#define DO_DEBUG_UART
+
+#define HAL_UART_ISR 2
+#define HAL_UART TRUE
+#define HAL_UART_DMA 1
+
 #include "hal_board_cfg_testapp.h"

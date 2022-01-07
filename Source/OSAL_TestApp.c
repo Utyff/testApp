@@ -56,6 +56,7 @@
 #include "APS.h"
 #include "ZDApp.h"
 
+#include "Debug.h"
 
 #include "bdb_interface.h"
 #if !defined (DISABLE_GREENPOWER_BASIC_PROXY) && (ZG_BUILD_RTR_TYPE)
@@ -140,6 +141,7 @@ uint16 *tasksEvents;
 void osalInitTasks( void )
 {
   uint8 taskID = 0;
+  DebugInit();
 
   tasksEvents = (uint16 *)osal_mem_alloc( sizeof( uint16 ) * tasksCnt);
   osal_memset( tasksEvents, 0, (sizeof( uint16 ) * tasksCnt));

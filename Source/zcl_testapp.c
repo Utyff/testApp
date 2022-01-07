@@ -93,6 +93,8 @@
 #include "hal_key.h"
 #include "hal_drivers.h"
 
+#include "Debug.h"
+
 /*********************************************************************
  * MACROS
  */
@@ -268,6 +270,7 @@ static zclGeneral_AppCallbacks_t zclTestApp_CmdCallbacks =
 void zclTestApp_Init( byte task_id )
 {
   zclTestApp_TaskID = task_id;
+  LREP("zclTestApp_Init - %d\r\n", task_id);
 
   // This app is part of the Home Automation Profile
   bdb_RegisterSimpleDescriptor( &zclTestApp_SimpleDesc );
@@ -1045,6 +1048,7 @@ void TestApp_HalKeyPoll (void)
 // Изменение состояния реле
 void updateRelay ( bool value )
 {
+    LREP("updateRelay. value - %d \r\n", value);
     if (value) {
         RELAY_STATE = 1;
     } else {

@@ -1333,7 +1333,7 @@
                 </option>
                 <option>
                     <name>General Xdata Stack Size</name>
-                    <state>0x400</state>
+                    <state>0x320</state>
                 </option>
                 <option>
                     <name>General Ext Stack Size</name>
@@ -1671,6 +1671,7 @@
                     <state>$PROJ_DIR$\..\..\..\..\..\Components\stack\zdo</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\Components\zmac</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\Components\zmac\f8w</state>
+                    <state>$PROJ_DIR$\..\zstack-lib</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -2138,24 +2139,24 @@
                 </option>
                 <option>
                     <name>AllowExtraOutput</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenerateExtraOutput</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>XExtraOutOverride</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>ExtraOutputFile</name>
-                    <state>TestApp.sim</state>
+                    <state>$PROJ_DIR$\..\firmwares\$CONFIG_NAME$.hex</state>
                 </option>
                 <option>
                     <name>ExtraOutputFormat</name>
                     <version>11</version>
-                    <state>60</state>
+                    <state>23</state>
                 </option>
                 <option>
                     <name>ExtraFormatVariant</name>
@@ -4235,6 +4236,12 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\ZMain\TI2530DB\ZMain.c</name>
+        </file>
+    </group>
+    <group>
+        <name>zstack-lib</name>
+        <file>
+            <name>$PROJ_DIR$\..\zstack-lib\Debug.c</name>
         </file>
     </group>
 </project>
