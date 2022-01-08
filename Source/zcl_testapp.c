@@ -423,14 +423,24 @@ uint16 zclTestApp_event_loop( uint8 task_id, uint16 events )
 
     if ( events & TESTAPP_EVT_BLINK )
     {
-        // переключим светодиод
-        HalLedSet( HAL_LED_3, HAL_LED_MODE_TOGGLE );
+        LREPMaster("TESTAPP_EVT_BLINK\r\n");
+        // В сети или не в сети?
+        if ( bdbAttributes.bdbNodeIsOnANetwork ) {
+            // гасим светодиод
+            HalLedSet ( HAL_LED_3, HAL_LED_MODE_OFF );
+        } else {
+            // переключим светодиод и взведем опять таймер
+            HalLedSet( HAL_LED_3, HAL_LED_MODE_TOGGLE );
+            osal_start_timerEx(zclTestApp_TaskID, TESTAPP_EVT_BLINK, 1000);
+        }
+
         return ( events ^ TESTAPP_EVT_BLINK );
     }
 
     // событие TESTAPP_EVT_LONG
     if ( events & TESTAPP_EVT_LONG )
     {
+        LREPMaster("TESTAPP_EVT_LONG\r\n");
         // Проверяем текущее состояние устройства
         // В сети или не в сети?
         if ( bdbAttributes.bdbNodeIsOnANetwork )
@@ -448,7 +458,7 @@ uint16 zclTestApp_event_loop( uint8 task_id, uint16 events )
                     BDB_COMMISSIONING_MODE_INITIATOR_TL
             );
             // будем мигать, пока не подключимся
-            osal_start_timerEx(zclTestApp_TaskID, TESTAPP_EVT_BLINK, 500);
+            osal_start_timerEx(zclTestApp_TaskID, TESTAPP_EVT_BLINK, 50);
         }
 
         return ( events ^ TESTAPP_EVT_LONG );
