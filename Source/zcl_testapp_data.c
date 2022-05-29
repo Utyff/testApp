@@ -96,7 +96,7 @@ const uint8 zclTestApp_HWRevision = TESTAPP_HWVERSION;
 const uint8 zclTestApp_ZCLVersion = TESTAPP_ZCLVERSION;
 const uint8 zclTestApp_ManufacturerName[] = { 6, 'D','I','Y','R','u','Z' };
 const uint8 zclTestApp_ModelId[] = { 9, 'D','I','Y','R','u','Z','_','R','T' };
-const uint8 zclTestApp_DateCode[] = { 8, '2','0','2','1','1','2','1','9' };
+const uint8 zclTestApp_DateCode[] = { 8, '2','0','2','2','0','2','0','3' };
 const uint8 zclTestApp_PowerSource = POWER_SOURCE_MAINS_1_PHASE;
 
 uint8 zclTestApp_LocationDescription[17] = { 16, ' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ' };

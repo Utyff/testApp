@@ -62,7 +62,9 @@ file(GLOB_RECURSE SOURCES
 
 add_executable(TestApp
         Source/preinclude.h
+        Source/hal_board_cfg_testapp.h
         Source/zcl_testapp.c
+        Source/zcl_testapp.h
         Source/zcl_testapp_data.c
         Source/OSAL_TestApp.c
         zstack-lib/air_quality.h

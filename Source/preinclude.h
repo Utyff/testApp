@@ -1,4 +1,3 @@
-/*
 #define SECURE 1
 #define TC_LINKKEY_JOIN
 #define NV_INIT
@@ -20,7 +19,8 @@
 #define ZCL_GROUPS
 #define ZCL_ON_OFF
 #define ZCL_REPORTING_DEVICE
-*/
+
+#define HAL_PA_LNA_CC2592
 #define DISABLE_GREENPOWER_BASIC_PROXY
 #define DEFAULT_CHANLIST 0x07FFF800  // Маска для работы на всех каналах
 
@@ -28,8 +28,8 @@
 
 #define DO_DEBUG_UART
 
-#define HAL_UART_ISR 2
 #define HAL_UART TRUE
 #define HAL_UART_DMA 1
+#define HAL_UART_ISR 2
 
 #include "hal_board_cfg_testapp.h"
